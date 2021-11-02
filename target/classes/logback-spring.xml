@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+	<include
+		resource="org/springframework/boot/logging/logback/base.xml" />
+	​
+	<contextName>r2dbc-poc</contextName>
+	<springProperty scope="context" name="ACTIVE_PROFILE"
+		source="spring.profiles.active" />
+	<property name="blockingQueueSize" value="5000" />
+
+	<!-- appenders -->
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="APP_LOG"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="net.logstash.logback.encoder.LogstashEncoder">
+			<customFields>{"appName":"rewards-account-details"}</customFields>
+		</encoder>
+	</appender>
+
+	<!--Local logging config -->
+	<springProfile name="local | test">
+
+		<!-- Async Appenders -->
+		<appender name="ASYNC_STDOUT"
+			class="ch.qos.logback.classic.AsyncAppender">
+			<appender-ref ref="STDOUT" />
+			<queueSize>${blockingQueueSize}</queueSize>
+			<neverBlock>true</neverBlock>
+		</appender>
+
+		<logger name="com.jojo.r2bc.poc" level="INFO"
+			additivity="false">
+			<appender-ref ref="ASYNC_STDOUT" />
+		</logger>
+		<logger name="org.springframework" level="ERROR"
+			additivity="false">
+			<appender-ref ref="ASYNC_STDOUT" />
+		</logger>
+		<root level="INFO">
+			<appender-ref ref="ASYNC_STDOUT" />
+		</root>
+	</springProfile>
+
+	<!--AWS logging config -->
+	<springProfile name="!local">
+	
+		<appender name="ASYNC_APP_LOG"
+			class="ch.qos.logback.classic.AsyncAppender">
+			<appender-ref ref="APP_LOG" />
+			<queueSize>${blockingQueueSize}</queueSize>
+			<neverBlock>true</neverBlock>
+		</appender>
+
+		<logger name="com.jojo.r2bc.poc" level="INFO"
+			additivity="false">
+			<appender-ref ref="ASYNC_APP_LOG" />
+		</logger>
+
+		<logger name="org.springframework" level="ERROR"
+			additivity="false">
+			<appender-ref ref="ASYNC_APP_LOG" />
+		</logger>
+
+		<root level="INFO">
+			<appender-ref ref="ASYNC_APP_LOG" />
+		</root>
+
+	</springProfile>
+</configuration>
