@@ -1,8 +1,8 @@
 # R2DBC-POC
- A test api used to see if r2dbc works
+ A test api used to see if r2dbc works. 
 
  # Getting Started
-
+You can  use the included postman collection to make api requests
 ### Reference Documentation
 For further reference, please consider the following sections:
 
